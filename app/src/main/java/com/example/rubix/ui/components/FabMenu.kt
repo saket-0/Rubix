@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun FabMenu(
     onCreateFolder: () -> Unit,
+    onCreateNote: () -> Unit,
     onImportImage: () -> Unit,
     onImportPdf: () -> Unit
 ) {
@@ -60,6 +61,15 @@ fun FabMenu(
                     onClick = {
                         expanded = false
                         onCreateFolder()
+                    }
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                FabMenuItem(
+                    icon = Icons.Default.Add,
+                    text = "New Note",
+                    onClick = {
+                        expanded = false
+                        onCreateNote()
                     }
                 )
                 Spacer(modifier = Modifier.height(12.dp))

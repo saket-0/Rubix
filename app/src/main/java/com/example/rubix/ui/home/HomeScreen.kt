@@ -29,6 +29,7 @@ import com.example.rubix.ui.components.NodeItemView
 @Composable
 fun HomeScreen(
     onNodeClick: (NodeEntity) -> Unit,
+    onCreateNote: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val nodes by viewModel.nodes.collectAsState()
@@ -62,6 +63,7 @@ fun HomeScreen(
         floatingActionButton = {
             FabMenu(
                 onCreateFolder = { showCreateFolderDialog = true },
+                onCreateNote = onCreateNote,
                 onImportImage = {
                      pickImage.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
                 },

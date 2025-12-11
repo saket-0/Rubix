@@ -9,6 +9,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.rubix.ui.editor.NoteEditorScreen
 import com.example.rubix.ui.home.HomeScreen
 import com.example.rubix.ui.navigation.Screen
 import com.example.rubix.ui.theme.RubixTheme
@@ -32,18 +33,44 @@ class MainActivity : ComponentActivity() {
                                 nullable = true
                             }
                         )
-                    ) {
+                    ) { backStackEntry ->
+                        val folderId = backStackEntry.arguments?.getString("folderId")
                         HomeScreen(
                             onNodeClick = { node ->
-                                if (node.type == com.example.rubix.data.local.NodeType.FOLDER) {
-                                  navController.navigate(Screen.Home.createRoute(node.id))
-                                } else {
-                                  navController.navigate(Screen.Viewer.createRoute(node.id))
+                                when (node.type) {
+                                    com.example.rubix.data.local.NodeType.FOLDER -> {
+                                        navController.navigate(Screen.Home.createRoute(node.id))
+                                    }
+                                    com.example.rubix.data.local.NodeType.NOTE -> {
+                                        navController.navigate(Screen.NoteEditor.createRoute(nodeId = node.id))
+                                    }
+                                    else -> {
+                                        navController.navigate(Screen.Viewer.createRoute(node.id))
+                                    }
                                 }
+                            },
+                            onCreateNote = {
+                                navController.navigate(Screen.NoteEditor.createRoute(parentId = folderId))
                             }
                         )
                     }
                     
+                    composable(
+                        route = Screen.NoteEditor.route,
+                        arguments = listOf(
+                            navArgument("nodeId") {
+                                type = NavType.StringType
+                                nullable = true
+                            },
+                            navArgument("parentId") {
+                                type = NavType.StringType
+                                nullable = true
+                            }
+                        )
+                    ) {
+                        NoteEditorScreen(navController = navController)
+                    }
+
                     composable(Screen.Viewer.route) { backStackEntry ->
                         ViewerScreen()
                     }

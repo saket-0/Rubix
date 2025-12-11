@@ -10,4 +10,15 @@ sealed class Screen(val route: String) {
             fun createRoute(nodeId: String) = "viewer/$nodeId"
         }
     }
+    object NoteEditor : Screen("note_editor?nodeId={nodeId}&parentId={parentId}") {
+        fun createRoute(nodeId: String? = null, parentId: String? = null): String {
+            return if (nodeId != null) {
+                "note_editor?nodeId=$nodeId"
+            } else if (parentId != null) {
+                "note_editor?parentId=$parentId"
+            } else {
+                "note_editor"
+            }
+        }
+    }
 }
