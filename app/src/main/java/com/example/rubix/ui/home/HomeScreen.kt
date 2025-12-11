@@ -6,59 +6,69 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import coil.compose.AsyncImage
 import com.example.rubix.data.local.NodeEntity
-import java.io.File
-import kotlin.random.Random
+import com.example.rubix.ui.components.CreateFolderDialog
+import com.example.rubix.ui.components.FabMenu
+import com.example.rubix.ui.components.NodeItemView
 
 @Composable
 fun HomeScreen(
-    onNodeClick: (String) -> Unit,
+    onNodeClick: (NodeEntity) -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val nodes by viewModel.nodes.collectAsState()
+    var showCreateFolderDialog by remember { mutableStateOf(false) }
 
     // Photo Picker
-    val pickMedia = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+    val pickImage = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
         if (uri != null) {
             viewModel.importImage(uri)
         }
     }
+    
+    // PDF Picker (Placeholder for future use with same pattern)
+    val pickPdf = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        if (uri != null) {
+             viewModel.importPdf(uri)
+        }
+    }
+
+    if (showCreateFolderDialog) {
+        CreateFolderDialog(
+            onDismiss = { showCreateFolderDialog = false },
+            onConfirm = { name ->
+                viewModel.createFolder(name)
+                showCreateFolderDialog = false
+            }
+        )
+    }
 
     Scaffold(
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = {
-                    pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+            FabMenu(
+                onCreateFolder = { showCreateFolderDialog = true },
+                onImportImage = {
+                     pickImage.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                },
+                onImportPdf = {
+                     pickPdf.launch("application/pdf")
                 }
-            ) {
-                Icon(Icons.Default.Add, contentDescription = "Add Image")
-            }
+            )
         }
     ) { paddingValues ->
         Box(
@@ -74,28 +84,12 @@ fun HomeScreen(
                 modifier = Modifier.fillMaxSize()
             ) {
                 items(nodes) { node ->
-                    NodeItemView(node = node, onClick = { onNodeClick(node.id) })
+                    NodeItemView(
+                        node = node, 
+                        onClick = { onNodeClick(node) }
+                    )
                 }
             }
         }
-    }
-}
-
-@Composable
-fun NodeItemView(node: NodeEntity, onClick: () -> Unit) {
-    Card(
-        shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        onClick = onClick,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        AsyncImage(
-            model = File(node.previewPath ?: (node.thumbnailPath ?: "")),
-            contentDescription = node.title,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .fillMaxWidth()
-                .aspectRatio(node.aspectRatio)
-        )
     }
 }

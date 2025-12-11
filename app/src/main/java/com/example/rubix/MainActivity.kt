@@ -4,9 +4,11 @@ package com.example.rubix
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.rubix.ui.home.HomeScreen
 import com.example.rubix.ui.navigation.Screen
 import com.example.rubix.ui.theme.RubixTheme
@@ -22,10 +24,22 @@ class MainActivity : ComponentActivity() {
                 val navController = rememberNavController()
                 
                 NavHost(navController = navController, startDestination = Screen.Home.route) {
-                    composable(Screen.Home.route) {
+                    composable(
+                        route = Screen.Home.route,
+                        arguments = listOf(
+                            navArgument("folderId") {
+                                type = NavType.StringType
+                                nullable = true
+                            }
+                        )
+                    ) {
                         HomeScreen(
-                            onNodeClick = { nodeId ->
-                                navController.navigate(Screen.Viewer.createRoute(nodeId))
+                            onNodeClick = { node ->
+                                if (node.type == com.example.rubix.data.local.NodeType.FOLDER) {
+                                  navController.navigate(Screen.Home.createRoute(node.id))
+                                } else {
+                                  navController.navigate(Screen.Viewer.createRoute(node.id))
+                                }
                             }
                         )
                     }
