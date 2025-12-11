@@ -38,6 +38,7 @@ import kotlin.random.Random
 
 @Composable
 fun HomeScreen(
+    onNodeClick: (String) -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val nodes by viewModel.nodes.collectAsState()
@@ -73,7 +74,7 @@ fun HomeScreen(
                 modifier = Modifier.fillMaxSize()
             ) {
                 items(nodes) { node ->
-                    NodeItemView(node)
+                    NodeItemView(node = node, onClick = { onNodeClick(node.id) })
                 }
             }
         }
@@ -81,10 +82,11 @@ fun HomeScreen(
 }
 
 @Composable
-fun NodeItemView(node: NodeEntity) {
+fun NodeItemView(node: NodeEntity, onClick: () -> Unit) {
     Card(
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        onClick = onClick,
         modifier = Modifier.fillMaxWidth()
     ) {
         AsyncImage(

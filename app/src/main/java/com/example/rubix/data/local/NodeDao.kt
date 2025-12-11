@@ -20,4 +20,7 @@ interface NodeDao {
 
     @Query("SELECT * FROM nodes WHERE title LIKE '%' || :query || '%'")
     suspend fun search(query: String): List<NodeEntity>
+
+    @Query("SELECT * FROM nodes WHERE id = :id")
+    fun getNode(id: String): Flow<NodeEntity?>
 }
