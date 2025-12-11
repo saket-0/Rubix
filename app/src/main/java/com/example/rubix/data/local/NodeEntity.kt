@@ -20,6 +20,7 @@ data class NodeEntity(
     val content: String? = null,
     val creationDate: Long = System.currentTimeMillis(),
     val aspectRatio: Float = 1.0f,
+    val sortOrder: Long = System.currentTimeMillis(),
 
     // Performance Columns
     val thumbnailPath: String? = null,
@@ -27,3 +28,4 @@ data class NodeEntity(
     val originalPath: String? = null,
     val dominantColor: Int? = null
 )
+

@@ -68,4 +68,39 @@ class HomeViewModel @Inject constructor(
             }
         }
     }
+    
+    /**
+     * Reorders nodes after drag-and-drop.
+     * Calculates new sortOrder for the moved item based on its neighbors.
+     */
+    fun reorderNodes(fromIndex: Int, toIndex: Int) {
+        val currentNodes = nodes.value.toMutableList()
+        if (fromIndex < 0 || fromIndex >= currentNodes.size || 
+            toIndex < 0 || toIndex >= currentNodes.size) return
+            
+        val movedNode = currentNodes[fromIndex]
+        currentNodes.removeAt(fromIndex)
+        currentNodes.add(toIndex, movedNode)
+        
+        // Calculate new sortOrder values
+        // Use timestamp-based ordering with gaps to allow future insertions
+        val updates = mutableListOf<Pair<String, Long>>()
+        val baseTime = System.currentTimeMillis()
+        
+        currentNodes.forEachIndexed { index, node ->
+            // Space items 1000ms apart for easy future insertions
+            val newSortOrder = baseTime + (index * 1000L)
+            if (node.sortOrder != newSortOrder) {
+                updates.add(node.id to newSortOrder)
+            }
+        }
+        
+        if (updates.isNotEmpty()) {
+            viewModelScope.launch {
+                nodeDao.updateSortOrders(updates)
+                Log.d("HomeViewModel", "Reordered ${updates.size} nodes")
+            }
+        }
+    }
 }
+

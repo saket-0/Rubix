@@ -22,7 +22,9 @@ object DatabaseModule {
             context,
             RubixDatabase::class.java,
             "rubix_db"
-        ).build()
+        )
+        .fallbackToDestructiveMigration()
+        .build()
     }
 
     @Provides
