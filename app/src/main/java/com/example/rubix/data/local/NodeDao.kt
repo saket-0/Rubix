@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface NodeDao {
-    @Query("SELECT * FROM nodes WHERE parentId = :parentId")
+    @Query("SELECT * FROM nodes WHERE (:parentId IS NULL AND parentId IS NULL) OR (parentId = :parentId) ORDER BY creationDate DESC")
     fun getAllInFolder(parentId: String?): Flow<List<NodeEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

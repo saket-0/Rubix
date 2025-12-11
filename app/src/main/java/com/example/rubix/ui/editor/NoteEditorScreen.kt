@@ -1,13 +1,18 @@
 package com.example.rubix.ui.editor
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -40,6 +45,10 @@ fun NoteEditorScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .systemBarsPadding()
+            .imePadding()
+            .background(MaterialTheme.colorScheme.surface)
+            .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
         // Title Input
@@ -47,7 +56,7 @@ fun NoteEditorScreen(
             value = uiState.title,
             onValueChange = { viewModel.updateContent(it, uiState.content) },
             textStyle = TextStyle(
-                fontSize = 24.sp,
+                fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface
             ),
@@ -57,7 +66,7 @@ fun NoteEditorScreen(
                     Text(
                         text = "Title",
                         style = TextStyle(
-                            fontSize = 24.sp,
+                            fontSize = 28.sp,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                         )
@@ -75,19 +84,17 @@ fun NoteEditorScreen(
             value = uiState.content,
             onValueChange = { viewModel.updateContent(uiState.title, it) },
             textStyle = TextStyle(
-                fontSize = 16.sp,
+                fontSize = 18.sp,
                 fontWeight = FontWeight.Normal,
                 color = MaterialTheme.colorScheme.onSurface
             ),
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f), // Take remaining space
+            modifier = Modifier.fillMaxWidth(),
             decorationBox = { innerTextField ->
                 if (uiState.content.isEmpty()) {
                     Text(
                         text = "Start typing...",
                         style = TextStyle(
-                            fontSize = 16.sp,
+                            fontSize = 18.sp,
                             fontWeight = FontWeight.Normal,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                         )
