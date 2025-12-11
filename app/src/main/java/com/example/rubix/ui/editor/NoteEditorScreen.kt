@@ -1,7 +1,6 @@
 package com.example.rubix.ui.editor
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -27,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.example.rubix.ui.components.GradientBackground
 
 @Composable
 fun NoteEditorScreen(
@@ -42,67 +42,71 @@ fun NoteEditorScreen(
         }
     }
 
-    Column(
+    GradientBackground(
         modifier = Modifier
-            .fillMaxSize()
             .systemBarsPadding()
             .imePadding()
-            .background(MaterialTheme.colorScheme.surface)
-            .verticalScroll(rememberScrollState())
-            .padding(16.dp)
     ) {
-        // Title Input
-        BasicTextField(
-            value = uiState.title,
-            onValueChange = { viewModel.updateContent(it, uiState.content) },
-            textStyle = TextStyle(
-                fontSize = 28.sp,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
-            ),
-            modifier = Modifier.fillMaxWidth(),
-            decorationBox = { innerTextField ->
-                if (uiState.title.isEmpty()) {
-                    Text(
-                        text = "Title",
-                        style = TextStyle(
-                            fontSize = 28.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp)
+        ) {
+            // Title Input
+            BasicTextField(
+                value = uiState.title,
+                onValueChange = { viewModel.updateContent(it, uiState.content) },
+                textStyle = TextStyle(
+                    fontSize = 28.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                ),
+                modifier = Modifier.fillMaxWidth(),
+                decorationBox = { innerTextField ->
+                    if (uiState.title.isEmpty()) {
+                        Text(
+                            text = "Title",
+                            style = TextStyle(
+                                fontSize = 28.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                            )
                         )
-                    )
-                }
-                innerTextField()
-            },
-            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary)
-        )
+                    }
+                    innerTextField()
+                },
+                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary)
+            )
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-        // Content Input
-        BasicTextField(
-            value = uiState.content,
-            onValueChange = { viewModel.updateContent(uiState.title, it) },
-            textStyle = TextStyle(
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Normal,
-                color = MaterialTheme.colorScheme.onSurface
-            ),
-            modifier = Modifier.fillMaxWidth(),
-            decorationBox = { innerTextField ->
-                if (uiState.content.isEmpty()) {
-                    Text(
-                        text = "Start typing...",
-                        style = TextStyle(
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Normal,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+            // Content Input
+            BasicTextField(
+                value = uiState.content,
+                onValueChange = { viewModel.updateContent(uiState.title, it) },
+                textStyle = TextStyle(
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Normal,
+                    color = MaterialTheme.colorScheme.onSurface
+                ),
+                modifier = Modifier.fillMaxWidth(),
+                decorationBox = { innerTextField ->
+                    if (uiState.content.isEmpty()) {
+                        Text(
+                            text = "Start typing...",
+                            style = TextStyle(
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Normal,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                            )
                         )
-                    )
-                }
-                innerTextField()
-            },
-            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary)
-        )
+                    }
+                    innerTextField()
+                },
+                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary)
+            )
+        }
     }
 }
+

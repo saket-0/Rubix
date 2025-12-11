@@ -19,11 +19,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.rubix.data.local.NodeEntity
 import com.example.rubix.ui.components.CreateFolderDialog
 import com.example.rubix.ui.components.FabMenu
+import com.example.rubix.ui.components.GradientBackground
 import com.example.rubix.ui.components.NodeItemView
 
 import androidx.compose.material.icons.filled.Search
@@ -63,54 +65,58 @@ fun HomeScreen(
         )
     }
 
-    Scaffold(
-        topBar = {
-            androidx.compose.material3.TopAppBar(
-                title = { },
-                actions = {
-                    androidx.compose.material3.IconButton(
-                        onClick = { onSearchClick() }
-                    ) {
-                        androidx.compose.material3.Icon(
-                            imageVector = androidx.compose.material.icons.Icons.Filled.Search,
-                            contentDescription = "Search"
+    GradientBackground {
+        Scaffold(
+            containerColor = Color.Transparent,
+            topBar = {
+                androidx.compose.material3.TopAppBar(
+                    title = { },
+                    actions = {
+                        androidx.compose.material3.IconButton(
+                            onClick = { onSearchClick() }
+                        ) {
+                            androidx.compose.material3.Icon(
+                                imageVector = androidx.compose.material.icons.Icons.Filled.Search,
+                                contentDescription = "Search"
+                            )
+                        }
+                    }
+                )
+            },
+            floatingActionButton = {
+                FabMenu(
+                    onCreateFolder = { showCreateFolderDialog = true },
+                    onCreateNote = onCreateNote,
+                    onImportImage = {
+                         pickImage.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                    },
+                    onImportPdf = {
+                         pickPdf.launch("application/pdf")
+                    }
+                )
+            }
+        ) { paddingValues ->
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+            ) {
+                LazyVerticalStaggeredGrid(
+                    columns = StaggeredGridCells.Fixed(2),
+                    contentPadding = PaddingValues(8.dp),
+                    verticalItemSpacing = 8.dp,
+                    horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    items(nodes) { node ->
+                        NodeItemView(
+                            node = node, 
+                            onClick = { onNodeClick(node) }
                         )
                     }
-                }
-            )
-        },
-        floatingActionButton = {
-            FabMenu(
-                onCreateFolder = { showCreateFolderDialog = true },
-                onCreateNote = onCreateNote,
-                onImportImage = {
-                     pickImage.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-                },
-                onImportPdf = {
-                     pickPdf.launch("application/pdf")
-                }
-            )
-        }
-    ) { paddingValues ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
-            LazyVerticalStaggeredGrid(
-                columns = StaggeredGridCells.Fixed(2),
-                contentPadding = PaddingValues(8.dp),
-                verticalItemSpacing = 8.dp,
-                horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp),
-                modifier = Modifier.fillMaxSize()
-            ) {
-                items(nodes) { node ->
-                    NodeItemView(
-                        node = node, 
-                        onClick = { onNodeClick(node) }
-                    )
                 }
             }
         }
     }
 }
+

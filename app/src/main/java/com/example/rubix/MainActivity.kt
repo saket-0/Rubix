@@ -4,6 +4,8 @@ package com.example.rubix
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -69,7 +71,11 @@ class MainActivity : ComponentActivity() {
                                 type = NavType.StringType
                                 nullable = true
                             }
-                        )
+                        ),
+                        enterTransition = { slideInVertically { it } },
+                        exitTransition = { slideOutVertically { it } },
+                        popEnterTransition = { slideInVertically { -it } },
+                        popExitTransition = { slideOutVertically { it } }
                     ) {
                         NoteEditorScreen(navController = navController)
                     }
