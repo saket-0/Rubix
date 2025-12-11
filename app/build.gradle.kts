@@ -69,6 +69,12 @@ dependencies {
     // 3. Image Loading (Coil) - The Visual Layer
     implementation(libs.coil.compose)
 
+    // 4. Camera (CameraX) - The Capture Layer
+    implementation(libs.androidx.camera.core)
+    implementation(libs.androidx.camera.camera2)
+    implementation(libs.androidx.camera.lifecycle)
+    implementation(libs.androidx.camera.view)
+
     // --- TESTING ---
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

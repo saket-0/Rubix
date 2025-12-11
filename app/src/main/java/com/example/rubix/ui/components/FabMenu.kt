@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.CreateNewFolder
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Image
@@ -49,7 +50,8 @@ fun FabMenu(
     onCreateFolder: () -> Unit,
     onCreateNote: () -> Unit,
     onImportImage: () -> Unit,
-    onImportPdf: () -> Unit
+    onImportPdf: () -> Unit,
+    onTakePhoto: () -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
     var hoveredIndex by remember { mutableStateOf(-1) }
@@ -78,6 +80,14 @@ fun FabMenu(
             containerColor = Color(0xFF2196F3),  // Blue
             onContentColor = Color.White,
             onClick = onCreateFolder
+        ),
+        RadialItem(
+            icon = Icons.Filled.CameraAlt,
+            label = "Take Photo",
+            angleDegrees = 202f,  // Between folder and image import
+            containerColor = Color(0xFF9C27B0),  // Purple
+            onContentColor = Color.White,
+            onClick = onTakePhoto
         ),
         RadialItem(
             icon = Icons.Filled.Image,

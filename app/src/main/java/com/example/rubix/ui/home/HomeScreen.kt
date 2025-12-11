@@ -36,6 +36,7 @@ fun HomeScreen(
     onNodeClick: (NodeEntity) -> Unit,
     onCreateNote: () -> Unit,
     onSearchClick: () -> Unit,
+    onTakePhoto: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val nodes by viewModel.nodes.collectAsState()
@@ -92,7 +93,8 @@ fun HomeScreen(
                     },
                     onImportPdf = {
                          pickPdf.launch("application/pdf")
-                    }
+                    },
+                    onTakePhoto = onTakePhoto
                 )
             }
         ) { paddingValues ->

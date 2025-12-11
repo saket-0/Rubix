@@ -22,4 +22,8 @@ sealed class Screen(val route: String) {
         }
     }
     object Search : Screen("search")
+    object Camera : Screen("camera?folderId={folderId}") {
+        fun createRoute(folderId: String?) = if (folderId != null) "camera?folderId=$folderId" else "camera"
+    }
 }
+

@@ -11,6 +11,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.rubix.ui.camera.CameraScreen
 import com.example.rubix.ui.editor.NoteEditorScreen
 import com.example.rubix.ui.home.HomeScreen
 import com.example.rubix.ui.navigation.Screen
@@ -56,6 +57,9 @@ class MainActivity : ComponentActivity() {
                             },
                             onSearchClick = {
                                 navController.navigate(Screen.Search.route)
+                            },
+                            onTakePhoto = {
+                                navController.navigate(Screen.Camera.createRoute(folderId))
                             }
                         )
                     }
@@ -101,6 +105,22 @@ class MainActivity : ComponentActivity() {
 
                     composable(Screen.Viewer.route) { backStackEntry ->
                         ViewerScreen()
+                    }
+                    
+                    composable(
+                        route = Screen.Camera.route,
+                        arguments = listOf(
+                            navArgument("folderId") {
+                                type = NavType.StringType
+                                nullable = true
+                            }
+                        ),
+                        enterTransition = { slideInVertically { it } },
+                        exitTransition = { slideOutVertically { it } },
+                        popEnterTransition = { slideInVertically { -it } },
+                        popExitTransition = { slideOutVertically { it } }
+                    ) {
+                        CameraScreen(navController = navController)
                     }
                 }
             }
