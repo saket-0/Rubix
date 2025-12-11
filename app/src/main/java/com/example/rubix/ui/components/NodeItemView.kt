@@ -5,9 +5,12 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -75,41 +78,74 @@ fun NodeItemView(
             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
             modifier = Modifier.fillMaxWidth()
         ) {
-            if (node.type == NodeType.FOLDER) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(1.2f)
-                        .padding(16.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.Folder,
-                        contentDescription = "Folder",
-                        modifier = Modifier.size(64.dp),
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                    Text(
-                        text = node.title,
-                        style = MaterialTheme.typography.labelMedium,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.align(Alignment.BottomCenter),
-                        textAlign = TextAlign.Center
+            when (node.type) {
+                NodeType.FOLDER -> {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(1.2f)
+                            .padding(16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Folder,
+                            contentDescription = "Folder",
+                            modifier = Modifier.size(64.dp),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                        Text(
+                            text = node.title,
+                            style = MaterialTheme.typography.labelMedium,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.align(Alignment.BottomCenter),
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+                NodeType.NOTE -> {
+                    // Note card with title and content preview
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(12.dp)
+                    ) {
+                        // Title
+                        Text(
+                            text = node.title.ifEmpty { "Untitled" },
+                            style = MaterialTheme.typography.titleMedium,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        
+                        // Content preview (if present)
+                        if (!node.content.isNullOrEmpty()) {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = node.content,
+                                style = MaterialTheme.typography.bodyMedium,
+                                maxLines = 4,
+                                overflow = TextOverflow.Ellipsis,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
+                else -> {
+                    // IMAGE or PDF - Show Thumbnail
+                    AsyncImage(
+                        model = File(node.previewPath ?: (node.thumbnailPath ?: "")),
+                        contentDescription = node.title,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(node.aspectRatio)
                     )
                 }
-            } else {
-                // IMAGE or PDF - Show Thumbnail
-                AsyncImage(
-                    model = File(node.previewPath ?: (node.thumbnailPath ?: "")),
-                    contentDescription = node.title,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(node.aspectRatio)
-                )
             }
         }
     }
 }
+
 

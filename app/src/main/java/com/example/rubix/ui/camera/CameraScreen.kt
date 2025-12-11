@@ -153,7 +153,7 @@ fun CameraScreen(
 private fun CameraContent(
     context: Context,
     lifecycleOwner: LifecycleOwner,
-    capturedUris: List<Uri>,
+    capturedUris: MutableList<Uri>,
     onPhotoTaken: (Uri) -> Unit,
     onDone: () -> Unit,
     onClose: () -> Unit
@@ -176,22 +176,14 @@ private fun CameraContent(
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
-        // Top bar with close button
+        // Top bar with photo count
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
+            horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = onClose) {
-                Icon(
-                    imageVector = Icons.Filled.Close,
-                    contentDescription = "Close",
-                    tint = Color.White
-                )
-            }
-            
             if (capturedUris.isNotEmpty()) {
                 Text(
                     text = "${capturedUris.size} photo${if (capturedUris.size > 1) "s" else ""}",
@@ -205,7 +197,7 @@ private fun CameraContent(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .aspectRatio(9f / 16f)
+                .weight(1f)
                 .clip(RoundedCornerShape(16.dp))
                 .padding(horizontal = 16.dp)
         ) {
@@ -250,52 +242,85 @@ private fun CameraContent(
             )
         }
         
-        Spacer(modifier = Modifier.weight(1f))
-        
-        // Bottom bar with controls
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(32.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Stack thumbnail (left)
-            Box(
-                modifier = Modifier.size(60.dp),
-                contentAlignment = Alignment.Center
+        // Preview Strip (LazyRow of captured photos)
+        if (capturedUris.isNotEmpty()) {
+            androidx.compose.foundation.lazy.LazyRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 12.dp, horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                if (capturedUris.isNotEmpty()) {
-                    Box {
+                items(count = capturedUris.size) { index ->
+                    val uri = capturedUris[index]
+                    Box(
+                        modifier = Modifier.size(60.dp)
+                    ) {
                         AsyncImage(
-                            model = capturedUris.last(),
-                            contentDescription = "Last photo",
+                            model = uri,
+                            contentDescription = "Captured photo $index",
                             contentScale = ContentScale.Crop,
                             modifier = Modifier
-                                .size(56.dp)
+                                .fillMaxSize()
                                 .clip(RoundedCornerShape(8.dp))
-                                .border(2.dp, Color.White, RoundedCornerShape(8.dp))
+                                .border(1.dp, Color.White.copy(alpha = 0.5f), RoundedCornerShape(8.dp))
                         )
                         
-                        // Badge count
-                        if (capturedUris.size > 1) {
-                            Box(
-                                modifier = Modifier
-                                    .align(Alignment.TopEnd)
-                                    .size(20.dp)
-                                    .background(Color(0xFF4CAF50), CircleShape),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = "${capturedUris.size}",
-                                    color = Color.White,
-                                    fontSize = 10.sp
-                                )
-                            }
+                        // Delete button on each thumbnail
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.TopEnd)
+                                .size(20.dp)
+                                .background(Color.Black.copy(alpha = 0.6f), CircleShape)
+                                .clickable {
+                                    // Delete the file and remove from list
+                                    try {
+                                        File(uri.path ?: "").delete()
+                                    } catch (e: Exception) {
+                                        Log.e(TAG, "Failed to delete", e)
+                                    }
+                                    capturedUris.removeAt(index)
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Close,
+                                contentDescription = "Remove",
+                                tint = Color.White,
+                                modifier = Modifier.size(12.dp)
+                            )
                         }
                     }
                 }
             }
+        }
+        
+        // Bottom bar with controls: Exit (left) - Shutter (center) - Done (right)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Exit button (left)
+            IconButton(
+                onClick = onClose,
+                modifier = Modifier.size(56.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .background(Color.White.copy(alpha = 0.2f), CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Close,
+                        contentDescription = "Close",
+                        tint = Color.White
+                    )
+                }
+            }
+            
+            Spacer(modifier = Modifier.weight(1f))
             
             // Shutter button (center)
             Box(
@@ -339,19 +364,19 @@ private fun CameraContent(
                 )
             }
             
+            Spacer(modifier = Modifier.weight(1f))
+            
             // Done button (right)
             Box(
-                modifier = Modifier.size(60.dp),
+                modifier = Modifier.size(56.dp),
                 contentAlignment = Alignment.Center
             ) {
                 if (capturedUris.isNotEmpty()) {
-                    Button(
+                    IconButton(
                         onClick = onDone,
-                        modifier = Modifier.size(56.dp),
-                        shape = CircleShape,
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF4CAF50)
-                        )
+                        modifier = Modifier
+                            .size(48.dp)
+                            .background(Color(0xFF4CAF50), CircleShape)
                     ) {
                         Icon(
                             imageVector = Icons.Filled.Check,
@@ -359,6 +384,9 @@ private fun CameraContent(
                             tint = Color.White
                         )
                     }
+                } else {
+                    // Placeholder to maintain spacing
+                    Spacer(modifier = Modifier.size(48.dp))
                 }
             }
         }
