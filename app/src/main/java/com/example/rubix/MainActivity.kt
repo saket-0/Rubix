@@ -1,4 +1,4 @@
-```kotlin
+
 package com.example.rubix
 
 import android.os.Bundle
@@ -51,6 +51,9 @@ class MainActivity : ComponentActivity() {
                             },
                             onCreateNote = {
                                 navController.navigate(Screen.NoteEditor.createRoute(parentId = folderId))
+                            },
+                            onSearchClick = {
+                                navController.navigate(Screen.Search.route)
                             }
                         )
                     }
@@ -71,6 +74,25 @@ class MainActivity : ComponentActivity() {
                         NoteEditorScreen(navController = navController)
                     }
 
+                    composable(Screen.Search.route) {
+                        com.example.rubix.ui.search.SearchScreen(
+                            navController = navController,
+                            onNodeClick = { node ->
+                                when (node.type) {
+                                    com.example.rubix.data.local.NodeType.FOLDER -> {
+                                        navController.navigate(Screen.Home.createRoute(node.id))
+                                    }
+                                    com.example.rubix.data.local.NodeType.NOTE -> {
+                                        navController.navigate(Screen.NoteEditor.createRoute(nodeId = node.id))
+                                    }
+                                    else -> {
+                                        navController.navigate(Screen.Viewer.createRoute(node.id))
+                                    }
+                                }
+                            }
+                        )
+                    }
+
                     composable(Screen.Viewer.route) { backStackEntry ->
                         ViewerScreen()
                     }
@@ -79,4 +101,3 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-```

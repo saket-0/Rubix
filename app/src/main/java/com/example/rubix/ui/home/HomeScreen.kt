@@ -26,10 +26,14 @@ import com.example.rubix.ui.components.CreateFolderDialog
 import com.example.rubix.ui.components.FabMenu
 import com.example.rubix.ui.components.NodeItemView
 
+import androidx.compose.material.icons.filled.Search
+
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     onNodeClick: (NodeEntity) -> Unit,
     onCreateNote: () -> Unit,
+    onSearchClick: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val nodes by viewModel.nodes.collectAsState()
@@ -60,6 +64,21 @@ fun HomeScreen(
     }
 
     Scaffold(
+        topBar = {
+            androidx.compose.material3.TopAppBar(
+                title = { },
+                actions = {
+                    androidx.compose.material3.IconButton(
+                        onClick = { onSearchClick() }
+                    ) {
+                        androidx.compose.material3.Icon(
+                            imageVector = androidx.compose.material.icons.Icons.Filled.Search,
+                            contentDescription = "Search"
+                        )
+                    }
+                }
+            )
+        },
         floatingActionButton = {
             FabMenu(
                 onCreateFolder = { showCreateFolderDialog = true },

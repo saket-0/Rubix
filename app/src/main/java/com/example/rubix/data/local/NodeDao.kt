@@ -18,7 +18,7 @@ interface NodeDao {
     @Delete
     suspend fun delete(node: NodeEntity)
 
-    @Query("SELECT * FROM nodes WHERE title LIKE '%' || :query || '%'")
+    @Query("SELECT * FROM nodes WHERE title LIKE '%' || :query || '%' OR content LIKE '%' || :query || '%' ORDER BY creationDate DESC")
     suspend fun search(query: String): List<NodeEntity>
 
     @Query("SELECT * FROM nodes WHERE id = :id")

@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CreateNewFolder
@@ -56,7 +57,7 @@ fun FabMenu(
                 modifier = Modifier.padding(bottom = 16.dp)
             ) {
                 FabMenuItem(
-                    icon = Icons.Default.CreateNewFolder,
+                    icon = Icons.Filled.CreateNewFolder,
                     text = "New Folder",
                     onClick = {
                         expanded = false
@@ -65,7 +66,7 @@ fun FabMenu(
                 )
                 Spacer(modifier = Modifier.height(12.dp))
                 FabMenuItem(
-                    icon = Icons.Default.Add,
+                    icon = Icons.Filled.Add,
                     text = "New Note",
                     onClick = {
                         expanded = false
@@ -74,7 +75,7 @@ fun FabMenu(
                 )
                 Spacer(modifier = Modifier.height(12.dp))
                 FabMenuItem(
-                    icon = Icons.Default.Image,
+                    icon = Icons.Filled.Image,
                     text = "Import Image",
                     onClick = {
                         expanded = false
@@ -83,7 +84,7 @@ fun FabMenu(
                 )
                 Spacer(modifier = Modifier.height(12.dp))
                 FabMenuItem(
-                    icon = Icons.Default.PictureAsPdf,
+                    icon = Icons.Filled.PictureAsPdf,
                     text = "Import PDF",
                     onClick = {
                         expanded = false
@@ -97,7 +98,7 @@ fun FabMenu(
             onClick = { expanded = !expanded }
         ) {
             Icon(
-                imageVector = Icons.Default.Add,
+                imageVector = Icons.Filled.Add,
                 contentDescription = "Expand Menu",
                 modifier = Modifier.rotate(rotation)
             )
