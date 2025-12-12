@@ -89,6 +89,7 @@ fun HomeScreen(
     val currentFolder by viewModel.currentFolder.collectAsState()
     
     var showCreateFolderDialog by remember { mutableStateOf(false) }
+    var isGlideMenuOpen by remember { mutableStateOf(false) }
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
@@ -118,6 +119,7 @@ fun HomeScreen(
 
     ModalNavigationDrawer(
         drawerState = drawerState,
+        gesturesEnabled = !isGlideMenuOpen,
         drawerContent = {
             ModalDrawerSheet(
                 modifier = Modifier.width(280.dp)
@@ -300,7 +302,8 @@ fun HomeScreen(
                             contentPadding = PaddingValues(12.dp),
                             verticalItemSpacing = 10.dp,
                             horizontalArrangement = Arrangement.spacedBy(10.dp),
-                            modifier = Modifier.fillMaxSize()
+                            modifier = Modifier.fillMaxSize(),
+                            userScrollEnabled = !isGlideMenuOpen
                         ) {
                             items(nodes, key = { it.id }) { node ->
                                 GlideMenuBox(
@@ -329,7 +332,8 @@ fun HomeScreen(
                                             color = Color(0xFFE53935), // Red
                                             onClick = { viewModel.moveToTrash(node.id) }
                                         )
-                                    )
+                                    ),
+                                    onMenuOpenChanged = { isOpen -> isGlideMenuOpen = isOpen }
                                 ) {
                                     NodeItemView(
                                         node = node,

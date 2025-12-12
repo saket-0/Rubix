@@ -74,13 +74,14 @@ fun NoteEditorScreen(
         }
     }
 
-    GradientBackground(
-        modifier = Modifier
-            .systemBarsPadding()
-            .imePadding()
-    ) {
+    // GradientBackground fills entire screen (extends behind status bar)
+    GradientBackground {
+        // Content respects system bar and IME padding
         Column(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
+                .systemBarsPadding()
+                .imePadding()
         ) {
             // Top Bar (Google Keep style)
             Row(
@@ -197,7 +198,7 @@ fun NoteEditorScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.surface)
+                    .background(Color.Transparent)
                     .padding(horizontal = 8.dp, vertical = 8.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically

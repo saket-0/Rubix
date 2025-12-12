@@ -46,7 +46,10 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -70,11 +73,13 @@ fun TrashScreen(
     viewModel: TrashViewModel = hiltViewModel()
 ) {
     val trashedNodes by viewModel.trashedNodes.collectAsState()
+    var isGlideMenuOpen by remember { mutableStateOf(false) }
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     
     ModalNavigationDrawer(
         drawerState = drawerState,
+        gesturesEnabled = !isGlideMenuOpen,
         drawerContent = {
             ModalDrawerSheet(modifier = Modifier.width(280.dp)) {
                 Box(
@@ -210,7 +215,8 @@ fun TrashScreen(
                             contentPadding = PaddingValues(12.dp),
                             verticalItemSpacing = 10.dp,
                             horizontalArrangement = Arrangement.spacedBy(10.dp),
-                            modifier = Modifier.fillMaxSize()
+                            modifier = Modifier.fillMaxSize(),
+                            userScrollEnabled = !isGlideMenuOpen
                         ) {
                             items(trashedNodes, key = { it.id }) { node ->
                                 GlideMenuBox(
@@ -227,7 +233,8 @@ fun TrashScreen(
                                             color = Color(0xFFE53935),
                                             onClick = { viewModel.deleteForever(node.id) }
                                         )
-                                    )
+                                    ),
+                                    onMenuOpenChanged = { isOpen -> isGlideMenuOpen = isOpen }
                                 ) {
                                     NodeItemView(
                                         node = node,
