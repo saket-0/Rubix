@@ -11,6 +11,7 @@ import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
+
 import androidx.camera.view.PreviewView
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
@@ -40,6 +41,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -50,8 +52,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -81,8 +85,10 @@ fun CameraScreen(
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
+    val scope = rememberCoroutineScope()
     
     var hasCameraPermission by remember { mutableStateOf(false) }
+    var isSaving by remember { mutableStateOf(false) }
     val capturedUris = remember { mutableStateListOf<Uri>() }
     
     // Permission launcher
@@ -111,8 +117,12 @@ fun CameraScreen(
                     capturedUris.add(uri)
                 },
                 onDone = {
-                    viewModel.confirmBatch(capturedUris.toList())
-                    navController.popBackStack()
+                    scope.launch {
+                        isSaving = true
+                        viewModel.confirmBatch(capturedUris.toList())
+                        isSaving = false
+                        navController.popBackStack()
+                    }
                 },
                 onClose = {
                     // Clean up temp files on cancel
@@ -126,6 +136,19 @@ fun CameraScreen(
                     navController.popBackStack()
                 }
             )
+            
+            // Loading Overlay
+            if (isSaving) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.5f))
+                        .clickable(enabled = false) {},
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(color = Color.White)
+                }
+            }
         } else {
             // Permission denied state
             Column(
