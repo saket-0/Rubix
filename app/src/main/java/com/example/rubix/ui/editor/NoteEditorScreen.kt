@@ -2,6 +2,7 @@ package com.example.rubix.ui.editor
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -10,17 +11,23 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Redo
+import androidx.compose.material.icons.automirrored.filled.Undo
+import androidx.compose.material.icons.filled.Archive
 import androidx.compose.material.icons.filled.FormatBold
 import androidx.compose.material.icons.filled.FormatItalic
 import androidx.compose.material.icons.filled.FormatUnderlined
-import androidx.compose.material.icons.filled.Redo
-import androidx.compose.material.icons.filled.Undo
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.NotificationAdd
+import androidx.compose.material.icons.filled.PushPin
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -32,7 +39,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -73,21 +82,65 @@ fun NoteEditorScreen(
         Column(
             modifier = Modifier.fillMaxSize()
         ) {
-            // Scrollable content area
+            // Top Bar (Google Keep style)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Back button
+                IconButton(onClick = { navController.popBackStack() }) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
+                        contentDescription = "Back",
+                        tint = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+                
+                // Action icons
+                Row {
+                    IconButton(onClick = { /* TODO: Pin */ }) {
+                        Icon(
+                            imageVector = Icons.Filled.PushPin,
+                            contentDescription = "Pin",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    IconButton(onClick = { /* TODO: Reminder */ }) {
+                        Icon(
+                            imageVector = Icons.Filled.NotificationAdd,
+                            contentDescription = "Add reminder",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    IconButton(onClick = { /* TODO: Archive */ }) {
+                        Icon(
+                            imageVector = Icons.Filled.Archive,
+                            contentDescription = "Archive",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+            
+            // Content area (scrollable)
             Column(
                 modifier = Modifier
                     .weight(1f)
                     .verticalScroll(rememberScrollState())
-                    .padding(16.dp)
+                    .padding(horizontal = 20.dp, vertical = 8.dp)
             ) {
-                // Title Input
+                // Title Input (larger, lighter weight like Google Keep)
                 BasicTextField(
                     value = uiState.title,
                     onValueChange = { viewModel.updateContent(it, richTextState.getContentAsHtml()) },
                     textStyle = TextStyle(
-                        fontSize = 28.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Normal,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        lineHeight = 32.sp
                     ),
                     modifier = Modifier.fillMaxWidth(),
                     decorationBox = { innerTextField ->
@@ -95,9 +148,10 @@ fun NoteEditorScreen(
                             Text(
                                 text = "Title",
                                 style = TextStyle(
-                                    fontSize = 28.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                                    fontSize = 24.sp,
+                                    fontWeight = FontWeight.Normal,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                                    lineHeight = 32.sp
                                 )
                             )
                         }
@@ -106,16 +160,17 @@ fun NoteEditorScreen(
                     cursorBrush = SolidColor(MaterialTheme.colorScheme.primary)
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(20.dp))
 
-                // Content Input with Rich Text
+                // Content Input
                 BasicTextField(
                     value = richTextState.textFieldValue,
                     onValueChange = { richTextState.onValueChange(it) },
                     textStyle = TextStyle(
-                        fontSize = 18.sp,
+                        fontSize = 16.sp,
                         fontWeight = FontWeight.Normal,
-                        color = MaterialTheme.colorScheme.onSurface
+                        color = MaterialTheme.colorScheme.onSurface,
+                        lineHeight = 24.sp
                     ),
                     modifier = Modifier
                         .fillMaxWidth()
@@ -123,11 +178,12 @@ fun NoteEditorScreen(
                     decorationBox = { innerTextField ->
                         if (richTextState.getPlainText().isEmpty()) {
                             Text(
-                                text = "Start typing...",
+                                text = "Note",
                                 style = TextStyle(
-                                    fontSize = 18.sp,
+                                    fontSize = 16.sp,
                                     fontWeight = FontWeight.Normal,
-                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                                    lineHeight = 24.sp
                                 )
                             )
                         }
@@ -137,103 +193,127 @@ fun NoteEditorScreen(
                 )
             }
             
-            // Formatting Toolbar
+            // Bottom Toolbar (Google Keep style)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(
-                        MaterialTheme.colorScheme.surfaceVariant,
-                        RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
-                    )
-                    .padding(horizontal = 8.dp, vertical = 4.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly
+                    .background(MaterialTheme.colorScheme.surface)
+                    .padding(horizontal = 8.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                // Bold
-                IconButton(
-                    onClick = { richTextState.toggleBold() },
-                    colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = if (richTextState.isBold) 
-                            MaterialTheme.colorScheme.primaryContainer 
-                        else MaterialTheme.colorScheme.surfaceVariant
-                    )
+                // Formatting buttons (left side)
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(0.dp)
                 ) {
-                    Icon(
-                        imageVector = Icons.Filled.FormatBold,
-                        contentDescription = "Bold",
-                        tint = if (richTextState.isBold) 
-                            MaterialTheme.colorScheme.onPrimaryContainer 
-                        else MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    // Bold
+                    IconButton(
+                        onClick = { richTextState.toggleBold() },
+                        modifier = Modifier.size(40.dp),
+                        colors = IconButtonDefaults.iconButtonColors(
+                            containerColor = if (richTextState.isBold) 
+                                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
+                            else Color.Transparent
+                        )
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.FormatBold,
+                            contentDescription = "Bold",
+                            modifier = Modifier.size(20.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    
+                    // Italic
+                    IconButton(
+                        onClick = { richTextState.toggleItalic() },
+                        modifier = Modifier.size(40.dp),
+                        colors = IconButtonDefaults.iconButtonColors(
+                            containerColor = if (richTextState.isItalic) 
+                                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
+                            else Color.Transparent
+                        )
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.FormatItalic,
+                            contentDescription = "Italic",
+                            modifier = Modifier.size(20.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    
+                    // Underline
+                    IconButton(
+                        onClick = { richTextState.toggleUnderline() },
+                        modifier = Modifier.size(40.dp),
+                        colors = IconButtonDefaults.iconButtonColors(
+                            containerColor = if (richTextState.isUnderline) 
+                                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
+                            else Color.Transparent
+                        )
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.FormatUnderlined,
+                            contentDescription = "Underline",
+                            modifier = Modifier.size(20.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
                 
-                // Italic
-                IconButton(
-                    onClick = { richTextState.toggleItalic() },
-                    colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = if (richTextState.isItalic) 
-                            MaterialTheme.colorScheme.primaryContainer 
-                        else MaterialTheme.colorScheme.surfaceVariant
-                    )
+                // Right side actions
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(0.dp)
                 ) {
-                    Icon(
-                        imageVector = Icons.Filled.FormatItalic,
-                        contentDescription = "Italic",
-                        tint = if (richTextState.isItalic) 
-                            MaterialTheme.colorScheme.onPrimaryContainer 
-                        else MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-                
-                // Underline
-                IconButton(
-                    onClick = { richTextState.toggleUnderline() },
-                    colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = if (richTextState.isUnderline) 
-                            MaterialTheme.colorScheme.primaryContainer 
-                        else MaterialTheme.colorScheme.surfaceVariant
-                    )
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.FormatUnderlined,
-                        contentDescription = "Underline",
-                        tint = if (richTextState.isUnderline) 
-                            MaterialTheme.colorScheme.onPrimaryContainer 
-                        else MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-                
-                Spacer(modifier = Modifier.weight(1f))
-                
-                // Undo
-                IconButton(
-                    onClick = { richTextState.undo() },
-                    enabled = richTextState.canUndo
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.Undo,
-                        contentDescription = "Undo",
-                        tint = if (richTextState.canUndo) 
-                            MaterialTheme.colorScheme.onSurfaceVariant 
-                        else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
-                    )
-                }
-                
-                // Redo
-                IconButton(
-                    onClick = { richTextState.redo() },
-                    enabled = richTextState.canRedo
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.Redo,
-                        contentDescription = "Redo",
-                        tint = if (richTextState.canRedo) 
-                            MaterialTheme.colorScheme.onSurfaceVariant 
-                        else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
-                    )
+                    // Undo
+                    IconButton(
+                        onClick = { richTextState.undo() },
+                        enabled = richTextState.canUndo,
+                        modifier = Modifier.size(40.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.Undo,
+                            contentDescription = "Undo",
+                            modifier = Modifier.size(20.dp),
+                            tint = if (richTextState.canUndo) 
+                                MaterialTheme.colorScheme.onSurfaceVariant 
+                            else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
+                        )
+                    }
+                    
+                    // Redo
+                    IconButton(
+                        onClick = { richTextState.redo() },
+                        enabled = richTextState.canRedo,
+                        modifier = Modifier.size(40.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.Redo,
+                            contentDescription = "Redo",
+                            modifier = Modifier.size(20.dp),
+                            tint = if (richTextState.canRedo) 
+                                MaterialTheme.colorScheme.onSurfaceVariant 
+                            else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
+                        )
+                    }
+                    
+                    // More options
+                    IconButton(
+                        onClick = { /* TODO: More options */ },
+                        modifier = Modifier.size(40.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.MoreVert,
+                            contentDescription = "More options",
+                            modifier = Modifier.size(20.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
             }
         }
     }
 }
+
 
 

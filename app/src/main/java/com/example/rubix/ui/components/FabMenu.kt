@@ -3,23 +3,21 @@ package com.example.rubix.ui.components
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
-import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AttachFile
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.CreateNewFolder
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Image
-import androidx.compose.material.icons.filled.PictureAsPdf
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -28,7 +26,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -42,33 +39,34 @@ import kotlin.math.sin
 import kotlin.math.sqrt
 
 /**
- * Radial FAB Menu - Buttons fan out in an arc when expanded.
- * Supports "slide-to-select" gesture: press FAB, drag to option, release to trigger.
+ * FAB with tap-to-create-note and drag-to-reveal radial menu.
+ * - Single tap: Creates a new note immediately
+ * - Drag: Reveals radial menu with import options
  */
 @Composable
 fun FabMenu(
     onCreateFolder: () -> Unit,
     onCreateNote: () -> Unit,
     onImportImage: () -> Unit,
-    onImportPdf: () -> Unit,
+    onImportFile: () -> Unit,
     onTakePhoto: () -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
     var hoveredIndex by remember { mutableStateOf(-1) }
+    var isDragging by remember { mutableStateOf(false) }
     
     val density = LocalDensity.current
-    val radiusDp = 100.dp
+    val radiusDp = 120.dp  // Increased for better visibility
     val radiusPx = with(density) { radiusDp.toPx() }
-    val buttonSizeDp = 48.dp
+    val buttonSizeDp = 52.dp
     val buttonSizePx = with(density) { buttonSizeDp.toPx() }
     
-    // Define menu items with angles (in degrees, 0° = right, counter-clockwise)
+    // Menu items (shown on drag)
     data class RadialItem(
         val icon: ImageVector,
         val label: String,
         val angleDegrees: Float,
         val containerColor: Color,
-        val onContentColor: Color,
         val onClick: () -> Unit
     )
     
@@ -78,44 +76,32 @@ fun FabMenu(
             label = "New Folder",
             angleDegrees = 180f,  // Left
             containerColor = Color(0xFF2196F3),  // Blue
-            onContentColor = Color.White,
             onClick = onCreateFolder
         ),
         RadialItem(
             icon = Icons.Filled.CameraAlt,
             label = "Take Photo",
-            angleDegrees = 202f,  // Between folder and image import
+            angleDegrees = 210f,
             containerColor = Color(0xFF9C27B0),  // Purple
-            onContentColor = Color.White,
             onClick = onTakePhoto
         ),
         RadialItem(
             icon = Icons.Filled.Image,
             label = "Import Image",
-            angleDegrees = 225f,  // Top-Left
+            angleDegrees = 240f,
             containerColor = Color(0xFF4CAF50),  // Green
-            onContentColor = Color.White,
             onClick = onImportImage
         ),
         RadialItem(
-            icon = Icons.Filled.Add,
-            label = "New Note",
+            icon = Icons.Filled.AttachFile,
+            label = "Import File",
             angleDegrees = 270f,  // Top
-            containerColor = Color(0xFFFFC107),  // Yellow/Amber
-            onContentColor = Color.Black,
-            onClick = onCreateNote
-        ),
-        RadialItem(
-            icon = Icons.Filled.PictureAsPdf,
-            label = "Import PDF",
-            angleDegrees = 315f,  // Top-Right
             containerColor = Color(0xFFFF9800),  // Orange
-            onContentColor = Color.White,
-            onClick = onImportPdf
+            onClick = onImportFile
         )
     )
     
-    // Animated expansion progress
+    // Animated expansion
     val expansionProgress by animateFloatAsState(
         targetValue = if (expanded) 1f else 0f,
         animationSpec = spring(
@@ -125,39 +111,28 @@ fun FabMenu(
         label = "expansion"
     )
     
-    // Main FAB rotation
-    val rotation by animateFloatAsState(
-        targetValue = if (expanded) 45f else 0f,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessMedium
-        ),
-        label = "fab_rotation"
-    )
-    
     Box(
         contentAlignment = Alignment.BottomEnd
     ) {
-        // Radial sub-buttons
-        menuItems.forEachIndexed { index, item ->
-            val angleRad = Math.toRadians(item.angleDegrees.toDouble())
-            val currentRadius = radiusPx * expansionProgress
-            
-            // Calculate offset from center (negative Y because screen coords are inverted)
-            val offsetX = (currentRadius * cos(angleRad)).toFloat()
-            val offsetY = (currentRadius * sin(angleRad)).toFloat()
-            
-            // Scale animation for hover feedback
-            val itemScale by animateFloatAsState(
-                targetValue = if (hoveredIndex == index) 1.2f else 1f,
-                animationSpec = spring(
-                    dampingRatio = Spring.DampingRatioMediumBouncy,
-                    stiffness = Spring.StiffnessHigh
-                ),
-                label = "item_scale_$index"
-            )
-            
-            if (expansionProgress > 0.01f) {
+        // Radial sub-buttons (only when expanded via drag)
+        if (expansionProgress > 0.01f) {
+            menuItems.forEachIndexed { index, item ->
+                val angleRad = Math.toRadians(item.angleDegrees.toDouble())
+                val currentRadius = radiusPx * expansionProgress
+                
+                val offsetX = (currentRadius * cos(angleRad)).toFloat()
+                val offsetY = (currentRadius * sin(angleRad)).toFloat()
+                
+                // Scale for hover feedback
+                val itemScale by animateFloatAsState(
+                    targetValue = if (hoveredIndex == index) 1.25f else 1f,
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioMediumBouncy,
+                        stiffness = Spring.StiffnessHigh
+                    ),
+                    label = "item_scale_$index"
+                )
+                
                 SmallFloatingActionButton(
                     onClick = {
                         expanded = false
@@ -173,9 +148,9 @@ fun FabMenu(
                         }
                         .size(buttonSizeDp * itemScale),
                     containerColor = item.containerColor,
-                    contentColor = item.onContentColor,
+                    contentColor = Color.White,
                     elevation = FloatingActionButtonDefaults.elevation(
-                        defaultElevation = 4.dp * expansionProgress
+                        defaultElevation = 6.dp * expansionProgress
                     )
                 ) {
                     Icon(
@@ -186,17 +161,29 @@ fun FabMenu(
             }
         }
         
-        // Main FAB with drag detection
+        // Main FAB - Tap to create note, drag to show menu
         FloatingActionButton(
-            onClick = { expanded = !expanded },
+            onClick = { }, // Handled by pointerInput
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
             modifier = Modifier
+                .pointerInput(Unit) {
+                    detectTapGestures(
+                        onTap = {
+                            // Single tap = create note
+                            if (!isDragging) {
+                                onCreateNote()
+                            }
+                        }
+                    )
+                }
                 .pointerInput(Unit) {
                     detectDragGestures(
                         onDragStart = {
+                            isDragging = true
                             expanded = true
                         },
                         onDrag = { change, _ ->
-                            // Determine which button the finger is over
                             val dragPos = change.position
                             val mainButtonCenter = Offset(buttonSizePx / 2, buttonSizePx / 2)
                             
@@ -213,7 +200,7 @@ fun FabMenu(
                                     (dragPos.y - itemY).pow(2)
                                 )
                                 
-                                if (distance < closestDistance && distance < radiusPx * 0.5f) {
+                                if (distance < closestDistance && distance < radiusPx * 0.6f) {
                                     closestDistance = distance
                                     closestIndex = index
                                 }
@@ -227,19 +214,21 @@ fun FabMenu(
                             }
                             expanded = false
                             hoveredIndex = -1
+                            isDragging = false
                         },
                         onDragCancel = {
                             expanded = false
                             hoveredIndex = -1
+                            isDragging = false
                         }
                     )
                 }
         ) {
             Icon(
-                imageVector = if (expanded) Icons.Filled.Add else Icons.Filled.Edit,
-                contentDescription = if (expanded) "Close Menu" else "Open Menu",
-                modifier = Modifier.rotate(rotation)
+                imageVector = Icons.Filled.Add,
+                contentDescription = "Create Note"
             )
         }
     }
 }
+

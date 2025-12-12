@@ -69,6 +69,25 @@ class HomeViewModel @Inject constructor(
         }
     }
     
+    // Generic file import (handles any file type)
+    fun importFile(uri: Uri) {
+        viewModelScope.launch {
+            try {
+                // Try to import as image first, fall back to PDF handler
+                val node = try {
+                    fileRepository.ingestImage(uri).copy(parentId = folderId)
+                } catch (e: Exception) {
+                    // If not an image, try as PDF
+                    fileRepository.ingestPdf(uri).copy(parentId = folderId)
+                }
+                nodeDao.insert(node)
+                Log.d("HomeViewModel", "Imported file: ${node.id} to folder: $folderId")
+            } catch (e: Exception) {
+                Log.e("HomeViewModel", "Error importing file", e)
+            }
+        }
+    }
+    
     /**
      * Reorders nodes after drag-and-drop.
      * Calculates new sortOrder for the moved item based on its neighbors.
