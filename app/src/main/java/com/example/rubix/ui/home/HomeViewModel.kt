@@ -159,4 +159,26 @@ class HomeViewModel @Inject constructor(
             }
         }
     }
+    
+    // Lifecycle actions
+    fun togglePin(nodeId: String) {
+        viewModelScope.launch {
+            nodeDao.togglePin(nodeId)
+            Log.d("HomeViewModel", "Toggled pin for: $nodeId")
+        }
+    }
+    
+    fun moveToArchive(nodeId: String) {
+        viewModelScope.launch {
+            nodeDao.moveToArchive(nodeId)
+            Log.d("HomeViewModel", "Archived: $nodeId")
+        }
+    }
+    
+    fun moveToTrash(nodeId: String) {
+        viewModelScope.launch {
+            nodeDao.moveToTrash(nodeId)
+            Log.d("HomeViewModel", "Trashed: $nodeId")
+        }
+    }
 }

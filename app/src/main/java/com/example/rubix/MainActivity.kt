@@ -8,6 +8,8 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.navigation.NavType
+import com.example.rubix.ui.archive.ArchiveScreen
+import com.example.rubix.ui.trash.TrashScreen
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -72,6 +74,12 @@ class MainActivity : ComponentActivity() {
                             },
                             onTakePhoto = {
                                 navController.navigate(Screen.Camera.createRoute(folderId))
+                            },
+                            onNavigateToArchive = {
+                                navController.navigate(Screen.Archive.route)
+                            },
+                            onNavigateToTrash = {
+                                navController.navigate(Screen.Trash.route)
                             }
                         )
                     }
@@ -133,6 +141,14 @@ class MainActivity : ComponentActivity() {
                         popExitTransition = { slideOutVertically { it } }
                     ) {
                         CameraScreen(navController = navController)
+                    }
+                    
+                    composable(Screen.Archive.route) {
+                        ArchiveScreen(navController = navController)
+                    }
+                    
+                    composable(Screen.Trash.route) {
+                        TrashScreen(navController = navController)
                     }
                 }
             }

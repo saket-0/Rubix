@@ -26,6 +26,11 @@ data class NodeEntity(
     val thumbnailPath: String? = null,
     val previewPath: String? = null,
     val originalPath: String? = null,
-    val dominantColor: Int? = null
+    val dominantColor: Int? = null,
+    
+    // Lifecycle Columns
+    val isArchived: Boolean = false,
+    val isTrashed: Boolean = false,
+    val isPinned: Boolean = false
 )
 
