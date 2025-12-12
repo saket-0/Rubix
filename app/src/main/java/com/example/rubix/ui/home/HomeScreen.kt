@@ -119,7 +119,9 @@ fun HomeScreen(
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
-            ModalDrawerSheet {
+            ModalDrawerSheet(
+                modifier = Modifier.width(280.dp)
+            ) {
                 // Header
                 Box(
                     modifier = Modifier
