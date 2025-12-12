@@ -92,12 +92,16 @@ fun GlideMenuBox(
     var accumulatedDragY by remember { mutableFloatStateOf(0f) }
     var triggerPositionY by remember { mutableFloatStateOf(0f) }
     // Calculate direction at menu open time and store it
-    var menuShowsDownward by remember { mutableStateOf(false) }
+    // Default: downward. Only upward if near bottom of screen.
+    var menuShowsDownward by remember { mutableStateOf(true) }
     
     // Option height in pixels
     val optionHeightPx = with(density) { 48.dp.toPx() }
-    // Threshold for "near top of screen" - top 25%
-    val topThresholdPx = screenHeightPx * 0.25f
+    // Menu height estimate: options count * option height + padding
+    // For safety, use 4 options * 48dp + 8dp padding = 200dp
+    val menuHeightPx = with(density) { 200.dp.toPx() }
+    // Bottom threshold: if trigger Y + menu height > screen height, open upward
+    val bottomThresholdPx = screenHeightPx - menuHeightPx
     
     // Animated opacity for the hamburger icon
     val iconAlpha by animateFloatAsState(
@@ -135,8 +139,9 @@ fun GlideMenuBox(
                                 // Wait for first touch
                                 awaitFirstDown(requireUnconsumed = false)
                                 
-                                // Determine direction at moment of touch based on current position
-                                menuShowsDownward = triggerPositionY < topThresholdPx
+                                // Determine direction: downward by default, upward only if near bottom
+                                // If trigger position + estimated menu height exceeds screen, go upward
+                                menuShowsDownward = triggerPositionY < bottomThresholdPx
                                 
                                 // Show menu immediately
                                 showMenu = true

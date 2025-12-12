@@ -211,7 +211,7 @@ fun ArchiveScreen(
                     } else {
                         LazyVerticalStaggeredGrid(
                             columns = StaggeredGridCells.Fixed(2),
-                            contentPadding = PaddingValues(12.dp),
+                            contentPadding = PaddingValues(start = 12.dp, end = 12.dp, top = 12.dp, bottom = 80.dp),
                             verticalItemSpacing = 10.dp,
                             horizontalArrangement = Arrangement.spacedBy(10.dp),
                             modifier = Modifier.fillMaxSize(),
