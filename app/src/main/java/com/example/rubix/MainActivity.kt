@@ -56,8 +56,12 @@ class MainActivity : ComponentActivity() {
                             },
                             onNavigateToFolder = { targetFolderId ->
                                 // Handle breadcrumb navigation
+                                // Pop back to root and navigate to the target folder
                                 navController.navigate(Screen.Home.createRoute(targetFolderId)) {
-                                    launchSingleTop = true
+                                    // Pop the entire Home stack to prevent buildup
+                                    popUpTo(Screen.Home.route) {
+                                        inclusive = true
+                                    }
                                 }
                             },
                             onCreateNote = {
