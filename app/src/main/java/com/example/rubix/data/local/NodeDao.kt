@@ -34,5 +34,11 @@ interface NodeDao {
             updateSortOrder(id, sortOrder)
         }
     }
+    
+    @Query("SELECT * FROM nodes WHERE id = :id")
+    suspend fun getNodeById(id: String): NodeEntity?
+    
+    @Query("UPDATE nodes SET parentId = :newParentId WHERE id = :nodeId")
+    suspend fun updateParentId(nodeId: String, newParentId: String?)
 }
 

@@ -8,9 +8,13 @@ import androidx.lifecycle.viewModelScope
 import com.example.rubix.data.local.NodeDao
 import com.example.rubix.data.local.NodeEntity
 import com.example.rubix.data.local.NodeType
+import com.example.rubix.data.repository.NodeRepository
 import com.example.rubix.domain.repository.IFileRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -18,11 +22,20 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val nodeDao: NodeDao,
+    private val nodeRepository: NodeRepository,
     private val fileRepository: IFileRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    private val folderId: String? = savedStateHandle["folderId"]
+    val folderId: String? = savedStateHandle["folderId"]
+    
+    // Breadcrumb path from root to current folder's parent
+    private val _breadcrumbPath = MutableStateFlow<List<NodeEntity>>(emptyList())
+    val breadcrumbPath: StateFlow<List<NodeEntity>> = _breadcrumbPath.asStateFlow()
+    
+    // Current folder info (for displaying current folder name)
+    private val _currentFolder = MutableStateFlow<NodeEntity?>(null)
+    val currentFolder: StateFlow<NodeEntity?> = _currentFolder.asStateFlow()
 
     val nodes = nodeDao.getAllInFolder(folderId)
         .stateIn(
@@ -30,6 +43,44 @@ class HomeViewModel @Inject constructor(
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = emptyList()
         )
+    
+    init {
+        loadBreadcrumbs()
+    }
+    
+    private fun loadBreadcrumbs() {
+        viewModelScope.launch {
+            if (folderId != null) {
+                _breadcrumbPath.value = nodeRepository.getAncestors(folderId)
+                _currentFolder.value = nodeRepository.getNodeById(folderId)
+            } else {
+                _breadcrumbPath.value = emptyList()
+                _currentFolder.value = null
+            }
+        }
+    }
+    
+    /**
+     * Moves an item to a new parent folder.
+     * Uses optimistic UI - the item will disappear from the current view
+     * as the folder's Flow will automatically update.
+     */
+    fun moveItem(itemId: String, targetFolderId: String?) {
+        // Don't allow moving to the same folder
+        if (targetFolderId == folderId) return
+        
+        // Don't allow moving a folder into itself
+        if (itemId == targetFolderId) return
+        
+        viewModelScope.launch {
+            try {
+                nodeRepository.moveNode(itemId, targetFolderId)
+                Log.d("HomeViewModel", "Moved item $itemId to folder: $targetFolderId")
+            } catch (e: Exception) {
+                Log.e("HomeViewModel", "Error moving item", e)
+            }
+        }
+    }
 
     fun createFolder(name: String) {
         viewModelScope.launch {
@@ -45,7 +96,6 @@ class HomeViewModel @Inject constructor(
     fun importImage(uri: Uri) {
         viewModelScope.launch {
             try {
-                // Repository uses Dispatchers.IO
                 val node = fileRepository.ingestImage(uri).copy(parentId = folderId)
                 nodeDao.insert(node)
                 Log.d("HomeViewModel", "Imported image: ${node.id} to folder: $folderId")
@@ -55,11 +105,9 @@ class HomeViewModel @Inject constructor(
         }
     }
     
-    // Future proofing for PDF support if added to UI later
     fun importPdf(uri: Uri) {
          viewModelScope.launch {
             try {
-                // Repository uses Dispatchers.IO
                 val node = fileRepository.ingestPdf(uri).copy(parentId = folderId)
                 nodeDao.insert(node)
                 Log.d("HomeViewModel", "Imported PDF: ${node.id} to folder: $folderId")
@@ -69,15 +117,12 @@ class HomeViewModel @Inject constructor(
         }
     }
     
-    // Generic file import (handles any file type)
     fun importFile(uri: Uri) {
         viewModelScope.launch {
             try {
-                // Try to import as image first, fall back to PDF handler
                 val node = try {
                     fileRepository.ingestImage(uri).copy(parentId = folderId)
                 } catch (e: Exception) {
-                    // If not an image, try as PDF
                     fileRepository.ingestPdf(uri).copy(parentId = folderId)
                 }
                 nodeDao.insert(node)
@@ -88,10 +133,6 @@ class HomeViewModel @Inject constructor(
         }
     }
     
-    /**
-     * Reorders nodes after drag-and-drop.
-     * Calculates new sortOrder for the moved item based on its neighbors.
-     */
     fun reorderNodes(fromIndex: Int, toIndex: Int) {
         val currentNodes = nodes.value.toMutableList()
         if (fromIndex < 0 || fromIndex >= currentNodes.size || 
@@ -101,13 +142,10 @@ class HomeViewModel @Inject constructor(
         currentNodes.removeAt(fromIndex)
         currentNodes.add(toIndex, movedNode)
         
-        // Calculate new sortOrder values
-        // Use timestamp-based ordering with gaps to allow future insertions
         val updates = mutableListOf<Pair<String, Long>>()
         val baseTime = System.currentTimeMillis()
         
         currentNodes.forEachIndexed { index, node ->
-            // Space items 1000ms apart for easy future insertions
             val newSortOrder = baseTime + (index * 1000L)
             if (node.sortOrder != newSortOrder) {
                 updates.add(node.id to newSortOrder)
@@ -122,4 +160,3 @@ class HomeViewModel @Inject constructor(
         }
     }
 }
-

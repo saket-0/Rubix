@@ -54,6 +54,12 @@ class MainActivity : ComponentActivity() {
                                     }
                                 }
                             },
+                            onNavigateToFolder = { targetFolderId ->
+                                // Handle breadcrumb navigation
+                                navController.navigate(Screen.Home.createRoute(targetFolderId)) {
+                                    launchSingleTop = true
+                                }
+                            },
                             onCreateNote = {
                                 navController.navigate(Screen.NoteEditor.createRoute(parentId = folderId))
                             },
